@@ -1,40 +1,40 @@
-import disnake,main,json
+import disnake,json
 import disnake.ext.commands as dext
 import disnake.ext.tasks as deks
-
-cache_embed=main.CacheData()
+import xfox
+cache_embed=xfox.CacheData()
 MISSING = disnake.utils.MISSING
 
 async def parse(code: str, autostr: bool | None = True, clear_output:bool=True,**kwargs):
     global cache_embed
-    a=await main.parse(code, autostr,clear_output,**kwargs)
-    cache_embed=main.CacheData()
+    a=await xfox.parse(code, autostr,clear_output,**kwargs)
+    cache_embed=xfox.CacheData()
     return a
 
-@main.addfunc(main.funcs)
+@xfox.addfunc(xfox.funcs)
 async def botname(*args, **kwargs):
     return kwargs["bot"].user.name
 
-@main.addfunc(main.funcs)
+@xfox.addfunc(xfox.funcs)
 async def defer(*args, **kwargs):
     await kwargs["ctx"].response.defer()
     return ''
 
-@main.addfunc(main.funcs)
+@xfox.addfunc(xfox.funcs)
 async def authorid(*args, **kwargs):
     return kwargs["ctx"].author.id
 
-@main.addfunc(main.funcs, 'title')
+@xfox.addfunc(xfox.funcs, 'title')
 async def xfembed_t(col:int,text:str, *args, **kwargs):
     setattr(kwargs["embed"], f"{col}_title", text)
     return ''
 
-@main.addfunc(main.funcs, 'description')
+@xfox.addfunc(xfox.funcs, 'description')
 async def xfembed_d(col:int,text:str, *args, **kwargs):
     setattr(kwargs["embed"], f"{col}_description", text)
     return ''
 
-@main.addfunc(main.funcs, 'color')
+@xfox.addfunc(xfox.funcs, 'color')
 async def xfembed_c(col:int,color:str,*args, **kwargs):
     try: 
         setattr(kwargs["embed"], f"{col}_color", int(color))
@@ -43,32 +43,32 @@ async def xfembed_c(col:int,color:str,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_color", getattr(disnake.Color, color.lower()))
     return ''
 
-@main.addfunc(main.funcs, 'footer')
+@xfox.addfunc(xfox.funcs, 'footer')
 async def xfembed_f(col:int,text:str,url:str=None,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_footer", [text,url])
     return ''
 
-@main.addfunc(main.funcs, "thumbnail")
+@xfox.addfunc(xfox.funcs, "thumbnail")
 async def xfembed_t(col:int,url:str,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_thumbnail", url)
     return ''
 
-@main.addfunc(main.funcs, 'author')
+@xfox.addfunc(xfox.funcs, 'author')
 async def xfembed_ath(col:int,text:str,url:str=None,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_author", [text,url])
     return ''
 
-@main.addfunc(main.funcs, "image")
+@xfox.addfunc(xfox.funcs, "image")
 async def xfembed_img(col:int,url:str,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_image", url)
     return ''
 
-@main.addfunc(main.funcs, "addfield")
+@xfox.addfunc(xfox.funcs, "addfield")
 async def xfembed_field(col:int,name:str, value:str, inline:bool=True,*args, **kwargs):
     setattr(kwargs["embed"], f"{col}_field_{name}", [value,inline])
     return ''
 
-@main.addfunc(main.funcs, "embed")
+@xfox.addfunc(xfox.funcs, "embed")
 async def xfembed(col:int,*args, **kwargs):
     cache_embed=kwargs["embed"]
     emb={}
@@ -99,7 +99,7 @@ async def xfembed(col:int,*args, **kwargs):
 #embed
 
 
-@main.addfunc(main.funcs)
+@xfox.addfunc(xfox.funcs)
 async def send_response(message:str,col:int=-1,*args, **kwargs):
     if col == -1:
         embe=MISSING
@@ -131,7 +131,7 @@ async def send_response(message:str,col:int=-1,*args, **kwargs):
     await kwargs["ctx"].response.send_message(message,embed=embe)
     return ''
 
-@main.addfunc(main.funcs)
+@xfox.addfunc(xfox.funcs)
 async def edit_response(message:str,col:int=-1, *args,**kwargs):
     if col == -1:
         embe=MISSING
@@ -180,7 +180,7 @@ class activity():
     def read(self):
         return self.__a
 
-class xfdisnake():
+class xcordisnake():
     def __init__(self, intents: dict = ("default",), activity: list = [], activity_second:int=60):
         if intents == "all":
             self.intents=disnake.Intents.all()
