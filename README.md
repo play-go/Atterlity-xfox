@@ -76,4 +76,4 @@ True
 
 # Examples
 
-package for creation Discord bots (beta)
+[package for creation Discord bots (beta)](https://github.com/play-go/xfox-code/tree/main/example/discord)
