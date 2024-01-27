@@ -32,9 +32,6 @@ $send_response[Hello World!]
 """
 )
 
-# https://vectips.com/wp-content/uploads/2017/03/project-preview-large-2.png
-
-
 bot.command(
     name="test_emb",
     description="embed",
