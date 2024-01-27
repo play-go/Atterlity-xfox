@@ -29,7 +29,7 @@ async def function4(*args, **kwargs):
 
 @xfox.addfunc(xfox.funcs)
 async def function1(item:int, type:bool,*args, **kwargs):
-    return type
+    return type, args
 
 @xfox.addfunc(xfox.funcs)
 async def function2(item:str, *args, **kwargs):
@@ -62,16 +62,16 @@ Output:
 ----- {'ctx': 'asdsdsdasds'}
 [LOG] Mising var item in function2
 None
- False
+ (False, ('$sadsadsdsd[]',))
 3 sometext
 3 FOX
-True
+(True, ('$sadsadsdsd[]',))
 $sdasdasd[sadsadsad]
 sdasdsa 231322 231322 231322
 good
 asdsdsdasds
 ERROR EXT Mising var type in function1
-True
+(True, ('world;yes',))
 ```
 
 # Examples
