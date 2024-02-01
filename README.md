@@ -2,7 +2,6 @@
 
 ### Asynchronous Low-code compiler for python
 
-
 # How to install
 
 ```bash
@@ -40,19 +39,44 @@ async def function2(item:str, *args, **kwargs):
 async def inside(item:str, type:bool=False,*args, **kwargs):
     return type
 
+@xfox.addfunc(xfox.funcs, 'usefunc')
+async def functest(func:xfox.AnonFunction,*args, **kwargs):
+    return (await func.compile(), func.name)
+
 # Sync Parsing
 print(asyncio.run(xfox.parse("""
+// TRASH (xd) //
 $test_func[$test_func[sfsaf]]
-$let[test;good] $function1[1;$inside[true];$sadsadsdsd[]] $onlyif[1<2;ONLYIF]
+$function1[1;$inside[true];$sadsadsdsd[]] $onlyif[1<2;ONLYIF]
 $function2[1+2;dsadasd] sometext
-$math[1+2] $function4[]
+$function4[]
 $function1[1;$inside[fsfdfd;true];$sadsadsdsd[]]
 $sdasdasd[sadsadsad]
 sdasdsa $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')]
+
+// Let/Get //
+$let[test;good]
 $get[test]
-$somef[test]
-$try[ERROR EXT $get[_];$function1[]] $try[$print[$get[_]];$function2[]]
-$function1[1;True;world\\;yes]
+// Internal Functions Test //
+$usefunc[$def[$print[hello!]]]
+$Test[]
+$def[$print[hello!];Test]
+$Test[] 
+                             
+// While Test //
+$let[a;0]
+$while[$math[$get[a]<=15];$let[a;$math[$get[a]+1]]]
+$get[a]
+
+// For Test //
+$for[1..5;$get[i]]
+$for[5;$get[i]]
+
+//--- Try Test ---//
+$try[ERROR EXT $get[_];$function1[]] 
+$try[$print[$get[_]];$function2[]]
+
+// a Comment // | /&/ Not a Comment /&/
 """, ctx="asdsdsdasds")))
 ```
 
@@ -60,18 +84,40 @@ Output:
 ```
 ----- {'ctx': 'asdsdsdasds'}
 ----- {'ctx': 'asdsdsdasds'}
+[LOG] hello!
+[LOG] hello!
 [LOG] Mising var item in function2
 None
- (False, ('$sadsadsdsd[]',))
+(False, ('$sadsadsdsd[]',))
 3 sometext
-3 FOX
+FOX
 (True, ('$sadsadsdsd[]',))
 $sdasdasd[sadsadsad]
 sdasdsa 231322 231322 231322
+
+
+
 good
-asdsdsdasds
+
+('', '70e5df')
+$Test[]
+
+
+
+
+
+
+16
+
+
+12345
+01234
+
+
 ERROR EXT Mising var type in function1
-(True, ('world;yes',))
+
+
+ | /&/ Not a Comment /&/
 ```
 
 # Examples
