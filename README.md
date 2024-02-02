@@ -57,6 +57,7 @@ sdasdsa $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')] 
 // Let/Get //
 $let[test;good]
 $get[test]
+
 // Internal Functions Test //
 $usefunc[$def[$print[hello!]]]
 $Test[]
@@ -72,7 +73,7 @@ $get[a]
 $for[1..5;$get[i]]
 $for[5;$get[i]]
 
-//--- Try Test ---//
+// Try Test //
 $try[ERROR EXT $get[_];$function1[]] 
 $try[$print[$get[_]];$function2[]]
 
