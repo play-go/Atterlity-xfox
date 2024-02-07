@@ -16,7 +16,7 @@ class AnonFunction:
         self.__code=code
     async def compile(self):
         return await parse(self.__code)
-
+VERSION="0.1.5"
 cache=CacheData()
 class StopWord(Exception):
     def __init__(self, text):
@@ -24,17 +24,18 @@ class StopWord(Exception):
 class Empty(Exception):
     def __init__(self, text):
         super().__init__(text)
-        
 class OnlyIf(Exception):
     def __init__(self, text):
         super().__init__(text)
-
 class WrongAnnotation(Exception):
+    def __init__(self, text):
+        super().__init__(text)
+class Raise(Exception):
     def __init__(self, text):
         super().__init__(text)
 
 DNTl=["xfexec",'try','if','for','def','while']
-output_rep={"&i":'$',"&j":"&","&k":';'}
+output_rep={"&i":'$',"&j":"&","&k":';',"&s":'//'}
 
 async def isempty(item, count=-1):
     fname=traceback.extract_stack()[-2][2]
@@ -60,6 +61,7 @@ def addfunc(clas, name=None):
 
 @addfunc(funcs, 'exec')
 async def pyexec(back:bool,*args, **kwargs):
+    "Allows to execute python code."
     str_obj = io.StringIO()
     nest_asyncio.apply()
     loop = asyncio.new_event_loop()
@@ -78,21 +80,39 @@ async def pyexec(back:bool,*args, **kwargs):
         return ret
     else: return ""
 
+@addfunc(funcs, 'help')
+async def phelp(name: str,*args, **kwargs):
+    "Allows you to find out the docstring and arguments of a function."
+    a=getattr(funcs, name)
+    if a.__doc__ == None or a.__doc__ == '':
+        return "The function haven't docstring"
+    else:
+        return a.__doc__
+
 @addfunc(funcs, 'break')
 async def pbreak(*args, **kwargs):
+    "Why?"
     raise StopWord("Break outside the cycle")
+
+@addfunc(funcs, 'raise')
+async def praise(error:str,text:str,*args, **kwargs):
+    "Allows you to raise errors."
+    raise Raise({"name":error,"text":text})
 
 @addfunc(funcs, 'input')
 async def pinput(text: str, *args, **kwargs):
+    "Get user input from console."
     return input(text)
 
 @addfunc(funcs, 'print')
 async def console(*args, **kwargs):
+    "Allows you to send a log message to the console."
     print("[LOG]","\n".join(args))
     return ''
 
 @addfunc(funcs, 'xfexec')
 async def xfexec(back:bool,*args, **kwargs):
+    "Allows you working with xfox from code."
     try:
         a = await __parse_code(args[0], **kwargs)
     except Exception as e:
@@ -102,6 +122,7 @@ async def xfexec(back:bool,*args, **kwargs):
 
 @addfunc(funcs, 'onlyif')
 async def onlyif(item: str, message: str, *args, **kwargs):
+    "Checks the statement and throws an error, if False.."
     if eval(item):
         return ""
     else:
@@ -109,18 +130,22 @@ async def onlyif(item: str, message: str, *args, **kwargs):
     
 @addfunc(funcs, 'eval')
 async def math(item:str, *args, **kwargs):
+    "Just... eval..."
     return eval(item)
 
 @addfunc(funcs, 'let')
 async def let(name:str, value, *args, **kwargs):
+    "Allows you to store data."
     setattr(cache, name, value)
     return ""
 @addfunc(funcs, 'get')
 async def get(name:str, *args, **kwargs):
+    "Allows you to get data from storage."
     return getattr(cache, name)
 
 @addfunc(funcs, 'try')
 async def xftry(onerror:str, *args, **kwargs):
+    "Just... 'try' from python..."
     try:
         return await __parse_code(args[0], **kwargs)
     except Exception as e:
@@ -129,10 +154,12 @@ async def xftry(onerror:str, *args, **kwargs):
     
 @addfunc(funcs, 'random')
 async def xfrandom(x:int, y:int, *args, **kwargs):
+    "Allows  to get random number from X to Y"
     return random.randint(x,y)
 
 @addfunc(funcs, "if")
 async def xfif(*args, **kwargs):
+    "Just... 'if' from python..."
     if len(args)%2==0:
         for i in range(0,len(args),2):
             if eval(await parse(args[i],in_cycle=True, **kwargs)):
@@ -146,6 +173,7 @@ async def xfif(*args, **kwargs):
 
 @addfunc(funcs, "while")
 async def xfwhile(q, code:str,*args, **kwargs):
+    "Just... 'while' from python..."
     trash=''
     while eval(await parse(q,in_cycle=True,**kwargs)):
         try:
@@ -158,6 +186,7 @@ async def xfwhile(q, code:str,*args, **kwargs):
 
 @addfunc(funcs, "for")
 async def xffor(item, code:str,*args, **kwargs):
+    "Just... 'for' from python..."
     item=await parse(item, **kwargs)
     trash=''
     try:
@@ -199,6 +228,7 @@ async def xffor(item, code:str,*args, **kwargs):
                 
 @addfunc(funcs, "len")
 async def xflen(item,*args, **kwargs):
+    "Allows to get string lenght."
     try:
         return len(dict(json.loads(item)).items())
     except TypeError as e:
@@ -208,6 +238,7 @@ async def xflen(item,*args, **kwargs):
 
 @addfunc(funcs, "reverse")
 async def xfreverse(item:str,*args, **kwargs):
+    "Allows to get reversed string."
     try:
         return list(json.loads(item))[::-1]
     except TypeError as e:
@@ -215,6 +246,7 @@ async def xfreverse(item:str,*args, **kwargs):
 
 @addfunc(funcs, "round")
 async def xfround(item:float,col:int=0,*args, **kwargs):
+    "Allows to get round number."
     if col == 0:
         return int(round(item,col))
     else:
@@ -222,26 +254,32 @@ async def xfround(item:float,col:int=0,*args, **kwargs):
 
 @addfunc(funcs, "lower")
 async def xflower(item:str,*args, **kwargs):
+    "Allows to get lowercase string."
     return item.lower()
 
 @addfunc(funcs, "upper")
 async def xfupper(item:str,*args, **kwargs):
+    "Allows to get uppercase string."
     return item.upper()
 
 @addfunc(funcs, "randomtextlist")
 async def xfrandomtext(item:list,col:int=1,*args, **kwargs):
+    "Allows to get random text from list."
     return random.choices(item,k=col)
 
 @addfunc(funcs, "randomtext")
 async def xfrandomtext(col:int=1, *args, **kwargs):
+    "Allows to get random text from args."
     return random.choices(args[:-1],k=col)
 
 @addfunc(funcs, "time")
 async def xftimestamp(*args, **kwargs):
+    "Allows to get timestamp."
     return time.time()
 
 @addfunc(funcs, "fetch")
 async def xffetch(item:str,name:str=None,*args, **kwargs):
+    "Fetching data and store in storage."
     if name == None:
         await let("_",json.loads(item))
         return "$get[_]"
@@ -251,6 +289,7 @@ async def xffetch(item:str,name:str=None,*args, **kwargs):
 
 @addfunc(funcs, "def")
 async def deffunc(code:str, name:str=None,*args, **kwargs):
+    "Allows to create anonymous (or not) function."
     if name == None:
         name=str(uuid.uuid4())[:6] #TODO: Надо будет потом сделать свою функцию
         await let(name,code)
@@ -390,6 +429,7 @@ async def __parse_code(code: str, autostr: bool | None = True, stop_word:bool=Fa
         return e.args[0]
     return code.strip()
 async def parse(code: str, autostr: bool = True, clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
+    "Parser for xfox code!"
     output=await __parse_code(re.sub('\/\/.*?\/\/', '', code), autostr,stop_word=stop_word,in_cycle=in_cycle,**kwargs)
     output=output.strip()
     if clear_output:
