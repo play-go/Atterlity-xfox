@@ -1,5 +1,5 @@
 ### Asynchronous Low-code compiler for python
-
+[github](https://github.com/play-go/Atterlity-xfox)
 # How to install
 
 ```bash
@@ -53,9 +53,13 @@ $function1[1;$inside[fsfdfd;true];$sadsadsdsd[]]
 $sdasdasd[sadsadsad]
 sdasdsa $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')]
 
+// Help (why? idk) //
+$help[help]
+
 // Let/Get //
 $let[test;good]
 $get[test]
+
 // Internal Functions Test //
 $usefunc[$def[$print[hello!]]]
 $Test[]
@@ -89,7 +93,7 @@ Output:
 [LOG] hello!
 [LOG] Mising var item in function2
 None
-(False, ('$sadsadsdsd[]',)) 
+(False, ('$sadsadsdsd[]',))
 3 sometext
 FOX
 (True, ('$sadsadsdsd[]',))
@@ -100,7 +104,7 @@ sdasdsa 231322 231322 231322
 
 good
 
-('', 'ee15cb')
+('', '26d65c')
 $Test[]
 
 
@@ -120,7 +124,19 @@ $Test[]
 ERROR EXT Mising var type in function1
 
 
- | /./ Not a Comment /./
+ | // Not a Comment //
+```
+
+# Interactive Xfox Interpreter
+
+```bash
+python -m xfox (filename).xfox
+```
+
+Or
+
+```Bash
+xfox (filename).xfox
 ```
 
 # Examples
