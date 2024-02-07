@@ -1,5 +1,5 @@
 # Говнокод от (меня)
-import re,asyncio,inspect,json,io,contextlib,traceback
+import re,asyncio,inspect,json,io,contextlib,traceback,math
 import random,time
 import nest_asyncio,uuid
 class funcs:
@@ -18,6 +18,9 @@ class AnonFunction:
         return await parse(self.__code)
 
 cache=CacheData()
+class StopWord(Exception):
+    def __init__(self, text):
+        super().__init__(text)
 class Empty(Exception):
     def __init__(self, text):
         super().__init__(text)
@@ -75,6 +78,10 @@ async def pyexec(back:bool,*args, **kwargs):
         return ret
     else: return ""
 
+@addfunc(funcs, 'break')
+async def pbreak(*args, **kwargs):
+    raise StopWord("Break outside the cycle")
+
 @addfunc(funcs, 'input')
 async def pinput(text: str, *args, **kwargs):
     return input(text)
@@ -100,7 +107,7 @@ async def onlyif(item: str, message: str, *args, **kwargs):
     else:
         raise OnlyIf(message)
     
-@addfunc(funcs, 'math')
+@addfunc(funcs, 'eval')
 async def math(item:str, *args, **kwargs):
     return eval(item)
 
@@ -128,20 +135,24 @@ async def xfrandom(x:int, y:int, *args, **kwargs):
 async def xfif(*args, **kwargs):
     if len(args)%2==0:
         for i in range(0,len(args),2):
-            if eval(await parse(args[i], **kwargs)):
-                return await parse(args[i+1], **kwargs)
+            if eval(await parse(args[i],in_cycle=True, **kwargs)):
+                return await parse(args[i+1],in_cycle=True, **kwargs)
     elif len(args)%2==1:
         for i in range(0,len(args[:-1]),2):
-            if eval(await parse(args[i], **kwargs)):
-                return await parse(args[i+1], **kwargs)
+            if eval(await parse(args[i],in_cycle=True, **kwargs)):
+                return await parse(args[i+1],in_cycle=True, **kwargs)
         else:
-            return await parse(args[::-1][0], **kwargs)
+            return await parse(args[::-1][0],in_cycle=True, **kwargs)
 
 @addfunc(funcs, "while")
 async def xfwhile(q, code:str,*args, **kwargs):
     trash=''
-    while eval(await parse(q, **kwargs)):
-        trash=trash+await parse(code, **kwargs)
+    while eval(await parse(q,in_cycle=True,**kwargs)):
+        try:
+            a=await parse(code, stop_word=True,in_cycle=True, **kwargs)
+        except StopWord:
+                break
+        trash=trash+a
     return trash
 
 
@@ -153,25 +164,37 @@ async def xffor(item, code:str,*args, **kwargs):
         for i,j in dict(json.loads(item)).items():
             await let("i",i)
             await let("j",j)
-            trash=trash+str(await parse(code, **kwargs))
+            try:
+                trash=trash+str(await parse(code,stop_word=True,in_cycle=True, **kwargs))
+            except StopWord:
+                break
         return trash
     except TypeError as e:
         if e.args[0]=="cannot convert dictionary update sequence element #0 to a sequence":
             for i in list(json.loads(item)):
                 await let("i",i)
-                trash=trash+str(await parse(code, **kwargs))
+                try:
+                    trash=trash+str(await parse(code,stop_word=True,in_cycle=True, **kwargs))
+                except StopWord:
+                    break
             return trash
     except: pass
     if len(item.split(".."))>1:
         a=item.split("..")
         for i in range(int(a[0]),int(a[1])+1):
             await let("i",i)
-            trash=trash+str(await parse(code, **kwargs))
+            try:
+                trash=trash+str(await parse(code,stop_word=True,in_cycle=True, **kwargs))
+            except StopWord:
+                break
         return trash
     else:
         for i in range(int(item)):
             await let("i",i)
-            trash=trash+str(await parse(code, **kwargs))
+            try:
+                trash=trash+str(await parse(code,stop_word=True,in_cycle=True, **kwargs))
+            except StopWord:
+                break
         return trash
                 
 @addfunc(funcs, "len")
@@ -218,9 +241,13 @@ async def xftimestamp(*args, **kwargs):
     return time.time()
 
 @addfunc(funcs, "fetch")
-async def xffetch(name:str,item:str,*args, **kwargs):
-    await let(name,json.loads(item))
-    return f"$get[{name}]"
+async def xffetch(item:str,name:str=None,*args, **kwargs):
+    if name == None:
+        await let("_",json.loads(item))
+        return "$get[_]"
+    else: 
+        await let(name,json.loads(item))
+        return f"$get[{name}]"
 
 @addfunc(funcs, "def")
 async def deffunc(code:str, name:str=None,*args, **kwargs):
@@ -263,7 +290,7 @@ async def parse_argument_DNT(arg:str):
                     raise IndexError(f"Out of range in '{function}'")
             code=code.replace(code[en_s:en],'&i'+code[en_s:en][1:].replace(";",'\\;'),1)
     return re.sub(r"(?<!\\)\;", '%#*()', code).replace("\\",'').replace("&i",'$').split('%#*()')
-async def __parse_code(code: str, autostr: bool | None = True, **kwargs):
+async def __parse_code(code: str, autostr: bool | None = True, stop_word:bool=False, in_cycle:bool=False, **kwargs):
     try:
         while True:
             enn=re.search(r'\$(\w+)\[',code.lower())
@@ -291,7 +318,7 @@ async def __parse_code(code: str, autostr: bool | None = True, **kwargs):
                     argument=await parse_argument_DNT(argument)
                 elif argument=='': argument=['']
                 else:
-                    argument=await parse_argument(await __parse_code(argument, **kwargs))
+                    argument=await parse_argument(await __parse_code(argument,in_cycle=in_cycle, **kwargs))
                 if hasattr(funcs,function):
                     fun=getattr(funcs, function)
                 elif hasattr(anonfuncs,function):
@@ -342,10 +369,17 @@ async def __parse_code(code: str, autostr: bool | None = True, **kwargs):
                                 raise WrongAnnotation(f"Wrong varible {i} type in {fun.__name__}. Need {isdnsd}")
                         else:
                             raise WrongAnnotation(f"Wrong varible {i} type in {fun.__name__}. Need {isdnsd}")
+                    output=''
+                    try:
+                        output=await fun(*argument,**kwargs)
+                    except StopWord:
+                        if stop_word==True or in_cycle == True:
+                            raise StopWord("0_0")
+                    
                     if autostr == True:
-                        code=code.replace(code[en_s:en], str(await fun(*argument,**kwargs)),1)
+                        code=code.replace(code[en_s:en], str(output),1)
                     elif autostr == False:
-                        code=code.replace(code[en_s:en], await fun(*argument,**kwargs),1)
+                        code=code.replace(code[en_s:en], output,1)
                 else:
                     raise Empty(f"Mising var {insp[len(argument)]} in {fun.__name__}")
             else:
@@ -355,11 +389,12 @@ async def __parse_code(code: str, autostr: bool | None = True, **kwargs):
     except OnlyIf as e:
         return e.args[0]
     return code.strip()
-async def parse(code: str, autostr: bool = True, clear_output:bool=True,**kwargs):
-    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code), autostr,**kwargs)
+async def parse(code: str, autostr: bool = True, clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
+    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code), autostr,stop_word=stop_word,in_cycle=in_cycle,**kwargs)
+    output=output.strip()
     if clear_output:
         for i,j in output_rep.items():
             output=re.sub(i,j,output)
-        return output.strip()
+        return output
     else:
-        return output.strip()
+        return output
