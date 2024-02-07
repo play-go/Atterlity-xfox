@@ -1,5 +1,3 @@
-<img src="media/X.svg" style="text-align: center;" width="15%"/>
-
 ### Asynchronous Low-code compiler for python
 
 # How to install
@@ -44,6 +42,7 @@ async def functest(func:xfox.AnonFunction,*args, **kwargs):
     return (await func.compile(), func.name)
 
 # Sync Parsing
+
 print(asyncio.run(xfox.parse("""
 // TRASH (xd) //
 $test_func[$test_func[sfsaf]]
@@ -57,7 +56,6 @@ sdasdsa $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')] 
 // Let/Get //
 $let[test;good]
 $get[test]
-
 // Internal Functions Test //
 $usefunc[$def[$print[hello!]]]
 $Test[]
@@ -66,18 +64,20 @@ $Test[]
                              
 // While Test //
 $let[a;0]
-$while[$math[$get[a]<=15];$let[a;$math[$get[a]+1]]]
+$while[$eval[$get[a]<=5];$let[a;$eval[$get[a]+1]]]
 $get[a]
-
+123 $while[True;$if[$get[a]<15;$let[a;$eval[$get[a]+1]];$break[]] $get[a]]
+123 $while[True;$break[]]
+$break[]
 // For Test //
 $for[1..5;$get[i]]
-$for[5;$get[i]]
+$for[5;$get[i] $break[]]
 
 // Try Test //
 $try[ERROR EXT $get[_];$function1[]] 
 $try[$print[$get[_]];$function2[]]
 
-// a Comment // | /&/ Not a Comment /&/
+// a Comment // | /./ Not a Comment /./
 """, ctx="asdsdsdasds")))
 ```
 
@@ -89,7 +89,7 @@ Output:
 [LOG] hello!
 [LOG] Mising var item in function2
 None
-(False, ('$sadsadsdsd[]',))
+(False, ('$sadsadsdsd[]',)) 
 3 sometext
 FOX
 (True, ('$sadsadsdsd[]',))
@@ -100,7 +100,7 @@ sdasdsa 231322 231322 231322
 
 good
 
-('', '70e5df')
+('', 'ee15cb')
 $Test[]
 
 
@@ -108,17 +108,19 @@ $Test[]
 
 
 
-16
+6
+123 789101112131415
+123
 
 
 12345
-01234
+
 
 
 ERROR EXT Mising var type in function1
 
 
- | /&/ Not a Comment /&/
+ | /./ Not a Comment /./
 ```
 
 # Examples
