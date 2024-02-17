@@ -1,5 +1,5 @@
 ### Asynchronous Low-code compiler for python
-
+[PYPI](https://pypi.org/project/xfox/)
 # How to install
 
 ```bash
