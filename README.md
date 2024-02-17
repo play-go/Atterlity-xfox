@@ -1,5 +1,5 @@
 ### Asynchronous Low-code compiler for python
-[github](https://github.com/play-go/Atterlity-xfox)
+
 # How to install
 
 ```bash
@@ -9,7 +9,7 @@ pip install xfox
 
 ```python
 import asyncio
-import xfox
+import xfox,time
 #Custom Function
 
 @xfox.addfunc(xfox.funcs)
@@ -53,9 +53,6 @@ $function1[1;$inside[fsfdfd;true];$sadsadsdsd[]]
 $sdasdasd[sadsadsad]
 sdasdsa $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')] $exec[true;print(1+231321, end='')]
 
-// Help (why? idk) //
-$help[help]
-
 // Let/Get //
 $let[test;good]
 $get[test]
@@ -73,20 +70,77 @@ $get[a]
 123 $while[True;$if[$get[a]<15;$let[a;$eval[$get[a]+1]];$break[]] $get[a]]
 123 $while[True;$break[]]
 $break[]
+                             
 // For Test //
 $for[1..5;$get[i]]
 $for[5;$get[i] $break[]]
 
 // Try Test //
-$try[ERROR EXT $get[_];$function1[]] 
+$try[ERROR $get[_];$function1[]] 
 $try[$print[$get[_]];$function2[]]
+$try[$get[_];$raise[name;text]]
 
-// a Comment // | /./ Not a Comment /./
+// Import usage
+$import[ttest]
+$functiomm[] <- (custom function from ttest)
+//
+
+// Exit - $exit[]//
+                                                                    
+// a Comment // | &s Not a Comment &s
 """, ctx="asdsdsdasds")))
 ```
 
 Output:
 ```
+----- {'ctx': 'asdsdsdasds'}
+----- {'ctx': 'asdsdsdasds'}
+[LOG] hello!
+[LOG] hello!
+[LOG] Mising var item in function2
+None
+(False, ('$sadsadsdsd[]',)) 
+3 sometext
+FOX
+(True, ('$sadsadsdsd[]',))
+$sdasdasd[sadsadsad]
+sdasdsa 231322 231322 231322
+
+
+
+good
+
+
+('', 'd489c9')
+$Test[]
+
+
+
+
+
+
+6
+123 789101112131415
+123
+
+
+
+12345
+
+
+
+ERROR Mising var type in function1
+
+[ERROR] name: text
+
+
+
+Hello, world!
+
+
+
+ | // Not a Comment //
+PS C:\Users\user\Documents\xfox> & C:/Users/user/AppData/Local/Programs/Python/Python310/python.exe c:/Users/user/Documents/xfox/test.py
 ----- {'ctx': 'asdsdsdasds'}
 ----- {'ctx': 'asdsdsdasds'}
 [LOG] hello!
@@ -104,7 +158,8 @@ sdasdsa 231322 231322 231322
 
 good
 
-('', '26d65c')
+
+('', 'dd6fe4')
 $Test[]
 
 
@@ -117,17 +172,38 @@ $Test[]
 123
 
 
+
 12345
 
 
 
-ERROR EXT Mising var type in function1
+ERROR Mising var type in function1
+
+[ERROR] name: text
+
+// Import usage
+
+Hello, world! <- (custom function from ttest)
+//
+
 
 
  | // Not a Comment //
 ```
 
 # Interactive Xfox Interpreter
+
+```bash
+python -m xfox
+```
+
+Or
+
+```Bash
+xfox
+```
+
+# Start xfox files
 
 ```bash
 python -m xfox (filename).xfox
@@ -141,4 +217,4 @@ xfox (filename).xfox
 
 # Examples
 
-[package for creation Discord bots (beta)](https://github.com/play-go/xfox-code/tree/main/example/discord)
+[package for creation Discord bots (outaded)](https://github.com/play-go/xfox-code/tree/main/example/discord)
