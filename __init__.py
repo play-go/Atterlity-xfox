@@ -1,5 +1,5 @@
 # Говнокод от (меня)
-import re,asyncio,inspect,json,io,contextlib,traceback,math
+import re,asyncio,inspect,json,io,contextlib,traceback,math,importlib
 import random,time
 import nest_asyncio,uuid
 class funcs:
@@ -16,7 +16,7 @@ class AnonFunction:
         self.__code=code
     async def compile(self):
         return await parse(self.__code)
-VERSION="0.1.5"
+VERSION="0.1.6"
 cache=CacheData()
 class StopWord(Exception):
     def __init__(self, text):
@@ -49,6 +49,9 @@ def isindclass(a,b):
         return True
     else:
         return False
+
+def classreturn(self):
+    return f"<Class {self.name}>"
 
 def addfunc(clas, name=None):
     def wrapper(func):
@@ -128,8 +131,15 @@ async def onlyif(item: str, message: str, *args, **kwargs):
     else:
         raise OnlyIf(message)
     
+@addfunc(funcs, 'import')
+async def importt(item:str, *args, **kwargs):
+    "Just... import..."
+    importlib.import_module(item, package=None)
+    return ''
+        
+    
 @addfunc(funcs, 'eval')
-async def math(item:str, *args, **kwargs):
+async def mathh(item:str, *args, **kwargs):
     "Just... eval..."
     return eval(item)
 
@@ -257,6 +267,11 @@ async def xflower(item:str,*args, **kwargs):
     "Allows to get lowercase string."
     return item.lower()
 
+@addfunc(funcs, "exit")
+async def pyexit(*args, **kwargs):
+    "Just... 'exit' from python..."
+    exit()
+
 @addfunc(funcs, "upper")
 async def xfupper(item:str,*args, **kwargs):
     "Allows to get uppercase string."
@@ -329,7 +344,7 @@ async def parse_argument_DNT(arg:str):
                     raise IndexError(f"Out of range in '{function}'")
             code=code.replace(code[en_s:en],'&i'+code[en_s:en][1:].replace(";",'\\;'),1)
     return re.sub(r"(?<!\\)\;", '%#*()', code).replace("\\",'').replace("&i",'$').split('%#*()')
-async def __parse_code(code: str, autostr: bool | None = True, stop_word:bool=False, in_cycle:bool=False, **kwargs):
+async def __parse_code(code: str, stop_word:bool=False, in_cycle:bool=False, **kwargs):
     try:
         while True:
             enn=re.search(r'\$(\w+)\[',code.lower())
@@ -414,11 +429,7 @@ async def __parse_code(code: str, autostr: bool | None = True, stop_word:bool=Fa
                     except StopWord:
                         if stop_word==True or in_cycle == True:
                             raise StopWord("0_0")
-                    
-                    if autostr == True:
-                        code=code.replace(code[en_s:en], str(output),1)
-                    elif autostr == False:
-                        code=code.replace(code[en_s:en], output,1)
+                    code=code.replace(code[en_s:en], str(output),1)
                 else:
                     raise Empty(f"Mising var {insp[len(argument)]} in {fun.__name__}")
             else:
@@ -427,10 +438,12 @@ async def __parse_code(code: str, autostr: bool | None = True, stop_word:bool=Fa
         pass
     except OnlyIf as e:
         return e.args[0]
+    except Raise as e:
+        raise Raise(f"[ERROR] {e.args[0]['name']}: {e.args[0]['text']}")
     return code.strip()
-async def parse(code: str, autostr: bool = True, clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
+async def parse(code: str, clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
     "Parser for xfox code!"
-    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code), autostr,stop_word=stop_word,in_cycle=in_cycle,**kwargs)
+    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code),stop_word=stop_word,in_cycle=in_cycle,**kwargs)
     output=output.strip()
     if clear_output:
         for i,j in output_rep.items():
