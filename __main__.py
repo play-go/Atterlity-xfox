@@ -1,9 +1,8 @@
 import xfox
 import sys,asyncio
-argv=sys.argv[1:]
-endphase='Bye!'
 def main():
-    global argv,endphase
+    global argv
+    argv=sys.argv[1:]
     try:
         match argv[0]:
             case "-p":
@@ -24,7 +23,6 @@ def main():
             try:
                 a=input(">>> ")
             except KeyboardInterrupt:
-                print(f"\n{endphase}")
                 return 0
             try:
                 print(asyncio.run(xfox.parse(a)))
