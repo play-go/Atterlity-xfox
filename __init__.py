@@ -1,7 +1,12 @@
 # Говнокод от (меня)
-import re,asyncio,inspect,json,io,contextlib,traceback,math,importlib
-import random,time
+import re,asyncio,inspect,json,io,contextlib,traceback,math,importlib,random,time
 import nest_asyncio,uuid
+try:
+    from termcolor import colored
+except:
+    def colored(a,b):
+        return a
+
 class funcs:
     def __init__(self) -> None:
         pass
@@ -16,7 +21,7 @@ class AnonFunction:
         self.__code=code
     async def compile(self):
         return await parse(self.__code)
-VERSION="0.1.6"
+VERSION="0.1.7"
 cache=CacheData()
 class StopWord(Exception):
     def __init__(self, text):
@@ -110,7 +115,7 @@ async def pinput(text: str, *args, **kwargs):
 @addfunc(funcs, 'print')
 async def console(*args, **kwargs):
     "Allows you to send a log message to the console."
-    print("[LOG]","\n".join(args))
+    print(colored("[LOG] "+'\n'.join(args),"yellow"))
     return ''
 
 @addfunc(funcs, 'xfexec')
@@ -185,6 +190,18 @@ async def xfif(*args, **kwargs):
 async def xfwhile(q, code:str,*args, **kwargs):
     "Just... 'while' from python..."
     trash=''
+    while eval(await parse(q,in_cycle=True,**kwargs)):
+        try:
+            a=await parse(code, stop_word=True,in_cycle=True, **kwargs)
+        except StopWord:
+                break
+        trash=trash+a
+    return trash
+
+@addfunc(funcs, "dowhile")
+async def xfdowhile(q, code:str,*args, **kwargs):
+    "do 'do' and check 'while'. If 'while'=True continue doing 'do'"
+    trash=await parse(code, stop_word=True,in_cycle=True, **kwargs)
     while eval(await parse(q,in_cycle=True,**kwargs)):
         try:
             a=await parse(code, stop_word=True,in_cycle=True, **kwargs)
@@ -306,7 +323,7 @@ async def xffetch(item:str,name:str=None,*args, **kwargs):
 async def deffunc(code:str, name:str=None,*args, **kwargs):
     "Allows to create anonymous (or not) function."
     if name == None:
-        name=str(uuid.uuid4())[:6] #TODO: Надо будет потом сделать свою функцию
+        name=str(uuid.uuid4())[:6]
         await let(name,code)
         return f"<Function {name}>"
     else:
@@ -439,15 +456,16 @@ async def __parse_code(code: str, stop_word:bool=False, in_cycle:bool=False, **k
     except OnlyIf as e:
         return e.args[0]
     except Raise as e:
-        raise Raise(f"[ERROR] {e.args[0]['name']}: {e.args[0]['text']}")
+        raise Raise(colored(f"[ERROR] {e.args[0]['name']}: {e.args[0]['text']}","red"))
     return code.strip()
-async def parse(code: str, clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
+async def parse(code: str,del_empty_lines:bool=False,clear_output:bool=True,stop_word:bool=False,in_cycle:bool=False,**kwargs):
     "Parser for xfox code!"
-    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code),stop_word=stop_word,in_cycle=in_cycle,**kwargs)
+    output=await __parse_code(re.sub('\/\/.*?\/\/', '', code, flags=re.DOTALL),stop_word=stop_word,in_cycle=in_cycle,**kwargs)
     output=output.strip()
     if clear_output:
         for i,j in output_rep.items():
             output=re.sub(i,j,output)
-        return output
-    else:
-        return output
+        output=output
+    if del_empty_lines:
+        output='\n'.join([line for line in output.splitlines() if line.strip() != ''])
+    return output
