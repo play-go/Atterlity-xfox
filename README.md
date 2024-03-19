@@ -1,16 +1,25 @@
 ### Asynchronous Low-code compiler for python
-[PYPI](https://pypi.org/project/xfox/)
+[github](https://github.com/play-go/Atterlity-xfox)
+
 # How to install
 
 ```bash
 pip install xfox
 ```
-# Clear Example
+
+## Optional
+
+```bash
+pip install termcolor
+```
+
+# Example
 
 ```python
 import asyncio
-import xfox,time
-#Custom Function
+import xfox
+
+#Custom Functions
 
 @xfox.addfunc(xfox.funcs)
 async def test_func(item:str, *args, **kwargs):
@@ -70,6 +79,9 @@ $get[a]
 123 $while[True;$if[$get[a]<15;$let[a;$eval[$get[a]+1]];$break[]] $get[a]]
 123 $while[True;$break[]]
 $break[]
+
+// DoWhile Test //
+$dowhile[1>2;Test]
                              
 // For Test //
 $for[1..5;$get[i]]
@@ -82,65 +94,16 @@ $try[$get[_];$raise[name;text]]
 
 // Import usage
 $import[ttest]
-$functiomm[] <- (custom function from ttest)
-//
+$functiomm[] <- (custom function from ttest) //
 
 // Exit - $exit[]//
                                                                     
 // a Comment // | &s Not a Comment &s
-""", ctx="asdsdsdasds")))
+""", ctx="asdsdsdasds",del_empty_lines=True)))
 ```
 
 Output:
 ```
------ {'ctx': 'asdsdsdasds'}
------ {'ctx': 'asdsdsdasds'}
-[LOG] hello!
-[LOG] hello!
-[LOG] Mising var item in function2
-None
-(False, ('$sadsadsdsd[]',)) 
-3 sometext
-FOX
-(True, ('$sadsadsdsd[]',))
-$sdasdasd[sadsadsad]
-sdasdsa 231322 231322 231322
-
-
-
-good
-
-
-('', 'd489c9')
-$Test[]
-
-
-
-
-
-
-6
-123 789101112131415
-123
-
-
-
-12345
-
-
-
-ERROR Mising var type in function1
-
-[ERROR] name: text
-
-
-
-Hello, world!
-
-
-
- | // Not a Comment //
-PS C:\Users\user\Documents\xfox> & C:/Users/user/AppData/Local/Programs/Python/Python310/python.exe c:/Users/user/Documents/xfox/test.py
 ----- {'ctx': 'asdsdsdasds'}
 ----- {'ctx': 'asdsdsdasds'}
 [LOG] hello!
@@ -153,41 +116,16 @@ FOX
 (True, ('$sadsadsdsd[]',))
 $sdasdasd[sadsadsad]
 sdasdsa 231322 231322 231322
-
-
-
 good
-
-
-('', 'dd6fe4')
+('', '2774ca')
 $Test[]
-
-
-
-
-
-
 6
 123 789101112131415
 123
-
-
-
+Test
 12345
-
-
-
 ERROR Mising var type in function1
-
 [ERROR] name: text
-
-// Import usage
-
-Hello, world! <- (custom function from ttest)
-//
-
-
-
  | // Not a Comment //
 ```
 
@@ -197,22 +135,10 @@ Hello, world! <- (custom function from ttest)
 python -m xfox
 ```
 
-Or
-
-```Bash
-xfox
-```
-
 # Start xfox files
 
 ```bash
 python -m xfox (filename).xfox
-```
-
-Or
-
-```Bash
-xfox (filename).xfox
 ```
 
 # Examples
