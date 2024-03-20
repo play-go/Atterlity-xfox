@@ -39,7 +39,7 @@ class Raise(Exception):
     def __init__(self, text):
         super().__init__(text)
 
-DNTl=["xfexec",'try','if','for','def','while']
+DNTl=["xfexec",'try','if','for','def','while',"dowhile"]
 output_rep={"&i":'$',"&j":"&","&k":';',"&s":'//'}
 
 async def isempty(item, count=-1):
